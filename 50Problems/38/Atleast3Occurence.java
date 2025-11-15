@@ -27,13 +27,8 @@ public class Atleast3Occurence {
     }
 
     public static int atleastthreeOccurence(int arr[],int n){
-        for(int i=0;i<n-1;i++){
-            if(arr[i]>arr[i+1]){
-                return 0;
-            }
-        }
         for(int i=0;i<n;i++){
-            int count=0;
+            int count=1;
             while(i+1<n && arr[i]==arr[i+1]){
                 count++;
                 i++;
