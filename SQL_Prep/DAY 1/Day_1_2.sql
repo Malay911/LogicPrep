@@ -338,6 +338,19 @@ WHERE Book.Price=(SELECT MAX(Book.Price)
 				  WHERE AuthorID=Author.AuthorID)
 ORDER BY Book.Price DESC
 
+WITH MAXPRICE AS(
+	SELECT AuthorID,MAX(Book.Price) AS MAXPRICE
+	FROM Book
+	GROUP BY AuthorID
+)
+SELECT Author.AuthorName,Book.Title,Book.Price
+FROM MAXPRICE JOIN Book
+ON Book.AuthorID=MAXPRICE.AuthorID
+AND Book.Price=MAXPRICE.MAXPRICE
+JOIN Author
+ON Author.AuthorID=Book.AuthorID
+ORDER BY Book.Price DESC
+
 -- 👨‍💼 Part – C: Employee & Location Schema
 --1
 
