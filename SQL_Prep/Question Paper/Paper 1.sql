@@ -67,6 +67,31 @@ INSERT INTO Employee (EmpID, Name, Email, City, Mobile, JoiningDate, Salary, Dep
 (120, 'Amit Singh', 'amit2@test.com', 'Pune', '1122112211', '2023-05-01', 51000.00, 5),
 (121, 'Priya Sharma', 'priya2@test.com', 'Mumbai', '2233223322', '2023-06-10', 70000.00, 5);
 
+--1: List all Employees which belongs to Changa.
+SELECT EmpID,Name,City
+FROM Employee
+WHERE City='Changa'
+
+--2: List all Employees who joined after 01 Jun, 2022 and belongs to either Computer or Civil.
+SELECT Employee.EmpID,Employee.Name,Employee.JoiningDate,Department.DeptName
+FROM Employee JOIN Department
+ON Employee.DeptID=Department.DeptID
+WHERE Department.DeptName IN ('Computer','Civil')
+GROUP BY EmpID,Name,JoiningDate,DeptName
+HAVING Employee.JoiningDate>'2022-06-01'
+
+--3: List all Employees with department name who don't have either mobile or email.
+SELECT Employee.EmpID,Employee.Name,Employee.Email,Employee.Mobile,Employee.JoiningDate,Department.DeptName
+FROM Employee JOIN Department
+ON Employee.DeptID=Department.DeptID
+WHERE Employee.Mobile IS NULL OR Employee.Email IS NULL
+
+--4: List top 5 employees as per salaries.
+SELECT TOP 5 Employee.EmpID,Employee.Name,Employee.Salary
+FROM Employee JOIN Department
+ON Employee.DeptID=Department.DeptID
+ORDER BY Employee.Salary DESC
+
 --5: List top 3 employees department wise as per salaries.
 WITH TOP3EMPLOYEE AS(
 	SELECT Employee.EmpID,Employee.Name,Department.DeptID,Employee.Salary,
@@ -82,3 +107,67 @@ FROM TOP3EMPLOYEE JOIN Department
 ON TOP3EMPLOYEE.DeptID=Department.DeptID
 WHERE rn>=3
 ORDER BY Department.DeptID,TOP3EMPLOYEE.Salary DESC
+
+--6: List City with Employee Count.
+SELECT Employee.City,COUNT(Employee.EmpID) AS EmployeeCount
+FROM Employee JOIN Department
+ON Employee.DeptID=Department.DeptID
+GROUP BY Employee.City
+
+--7: List City Wise Maximum, Minimum & Average Salaries & Give Proper Name As MaxSal, MinSal & AvgSal.
+SELECT Employee.City,MAX(Employee.Salary) AS MaxSal,MIN(Employee.Salary) AS MinSal,AVG(Employee.Salary) AS AvgSal
+FROM Employee
+GROUP BY Employee.City
+
+--8: List Department wise City wise Employee Count.
+SELECT Department.DeptName,Employee.City,COUNT(Employee.EmpID) AS EmployeeCount
+FROM Employee JOIN Department
+ON Employee.DeptID=Department.DeptID
+GROUP BY Department.DeptName,Employee.City
+
+--9: List Departments with more than 9 employees.
+SELECT Department.DeptName,COUNT(Employee.EmpID) AS EmployeeCount
+FROM Employee JOIN Department
+ON Employee.DeptID=Department.DeptID
+GROUP BY Department.DeptName
+HAVING COUNT(Employee.EmpID)>9
+
+--10: Give 10% increment in salary to all employees who belongs to Mechanical Department.
+UPDATE Employee
+SET Employee.Salary=Employee.Salary+Employee.Salary*0.1
+FROM Employee JOIN Department
+ON Employee.DeptID=Department.DeptID
+WHERE Department.DeptName='Mechanical'
+
+--11: Update City of Sandeep from Mumbai to Pune having 101 as Employee ID.
+UPDATE Employee
+SET City='Pune'
+WHERE EmpID=101
+
+--12: Delete all the employees who belongs to HR Department & Salary is more than 45,000.
+DELETE Employee
+FROM Employee JOIN Department
+ON Employee.DeptID=Department.DeptID
+WHERE Department.DeptName='HR' AND Employee.Salary>45000
+
+--13: List Employees with same name with occurrence of name.
+SELECT Name,COUNT(Name) AS OccurrenceCount
+FROM Employee
+GROUP BY Name
+HAVING COUNT(Name)>1
+
+--14: List Department wise Average Salary.
+SELECT Department.DeptName,AVG(Employee.Salary) AS AverageSalary
+FROM Department JOIN Employee
+ON Employee.DeptID=Department.DeptID
+GROUP BY Department.DeptName 
+
+--15: List City wise highest paid employee.
+SELECT E1.City,E1.Name,E1.Salary
+FROM Employee E1
+WHERE E1.Salary=(
+	SELECT MAX(E2.Salary)
+	FROM Employee E2
+	WHERE E2.City=E1.City
+)
+ORDER BY E1.Salary DESC
