@@ -159,3 +159,13 @@ WHERE Price=(SELECT MAX(Price)
 )
 
 GROUP BY ProductName
+
+SELECT TOP 1 Products.ProductName,Products.Price
+FROM Products
+WHERE Products.Price IN (
+	SELECT TOP 2 Products.Price
+	FROM Products
+	ORDER BY Products.Price DESC
+)
+ORDER BY Products.Price
+
