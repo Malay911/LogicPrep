@@ -142,7 +142,7 @@ WHERE Orders.ProductID IS NULL
 --9: Find Customers having Same JoinDate.
 SELECT Customers.JoinDate,Customers.Name
 FROM Customers
-WHERE Customers.JoinDate=(
+WHERE Customers.JoinDate IN (
 	SELECT Customers.JoinDate
 	FROM Customers
 	GROUP BY Customers.JoinDate
@@ -157,4 +157,5 @@ WHERE Price=(SELECT MAX(Price)
 			 WHERE PRICE<(SELECT MAX(Price) 
 			              FROM Products)
 )
+
 GROUP BY ProductName
