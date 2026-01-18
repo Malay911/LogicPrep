@@ -116,3 +116,49 @@ AND Orders.OrderID IS NULL
 SELECT MONTH(Orders.OrderDate) as SalesMonth,SUM(Orders.TotalAmount)
 FROM Orders
 WHERE MONTH(Orders.OrderDate)=DATEADD(MONTH,-6,GETDATE())
+
+--4: Find customers who ordered the same product more than once. (repeat buyers)
+SELECT CONCAT(Customers.FirstName,' ',Customers.LastName) AS CustomerName,Products.ProductName,COUNT(Orders.ProductID) AS OrderCount
+FROM Customers JOIN Orders
+ON Customers.CustomerID=Orders.CustomerID
+JOIN Products
+ON Products.ProductID=Orders.ProductID
+GROUP BY CONCAT(Customers.FirstName,' ',Customers.LastName),Products.ProductName
+HAVING COUNT(Orders.ProductID)>1
+
+--5: Identify products never ordered in the last 3 months.
+SELECT Products.ProductName
+FROM Products LEFT JOIN Orders
+ON Products.ProductID=Orders.ProductID
+AND MONTH(Orders.OrderDate)>=DATEADD(MONTH,-3,GETDATE())
+WHERE Orders.OrderID IS NULL
+
+--6: List products with low stock (less than 10 units) and high demand (more than 20 units ordered).
+SELECT Products.ProductName,Products.StockQuantity,SUM(Orders.Quantity) AS TotalUnitsOrdered
+FROM Products JOIN Orders
+ON Products.ProductID=Orders.ProductID
+GROUP BY Products.ProductName,Products.StockQuantity
+HAVING Products.StockQuantity<10 AND SUM(Orders.Quantity)>20
+
+--7: List customers who ordered in every month of the current year.
+SELECT CONCAT(Customers.FirstName,' ',Customers.LastName) AS CustomerName
+FROM Customers JOIN Orders
+ON Customers.CustomerID=Orders.CustomerID
+WHERE YEAR(Orders.OrderDate)=YEAR(GETDATE())
+GROUP BY Customers.FirstName,Customers.LastName
+HAVING COUNT(DISTINCT MONTH(Orders.OrderDate))=MONTH(GETDATE())
+
+--8: Find customers who has placed maximum number of orders.
+SELECT TOP 1 CONCAT(Customers.FirstName,' ',Customers.LastName) AS CustomerName,COUNT(Orders.OrderID) AS NumberOfOrders
+FROM Customers JOIN Orders
+ON Customers.CustomerID=Orders.CustomerID
+GROUP BY Customers.FirstName,Customers.LastName
+ORDER BY COUNT(Orders.OrderID) DESC
+
+--9: List customers whose order was either 'Cancelled' or 'Pending'.
+SELECT CONCAT(Customers.FirstName,' ',Customers.LastName) AS CustomerName,Orders.OrderStatus
+FROM Customers JOIN Orders
+ON Customers.CustomerID=Orders.CustomerID
+WHERE Orders.OrderStatus IN ('Cancelled','Pending')
+
+--10: Find customers with unusual ordering patterns (gaps > 60 days followed by large orders).
